@@ -1,0 +1,17 @@
+- What the project is
+- How to set up the environment
+- How to run tests
+- How to run a backtest
+- How to run a live trading session
+- How to deploy the trading algorithm to a remote server
+- How to monitor the trading algorithm
+- How to update the trading algorithm
+- How to troubleshoot the trading algorithm
+- How to improve the trading algorithm
+- How to add new features to the trading algorithm
+- How to optimize the trading algorithm
+- How to backtest the trading algorithm
+- How to run a live trading session
+- How to deploy the trading algorithm to a remote server
+- How to monitor the trading algorithm
+
