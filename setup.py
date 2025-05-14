@@ -1,43 +1,55 @@
 from setuptools import setup, find_packages
 
-# Read requirements from requirements.txt
-with open("requirements.txt") as f:
-    requirements = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-
 setup(
     name="trading",
     version="0.1.0",
-    description="A professional-grade algorithmic trading system",
-    author="Your Name",
-    author_email="your.email@example.com",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    python_requires=">=3.11",  # We're using modern Python features
-    install_requires=requirements,
-    extras_require={
-        "dev": [
-            "pytest>=7.4.0",
-            "pytest-cov>=4.1.0",
-            "black>=23.7.0",
-            "flake8>=6.1.0",
-            "mypy>=1.5.1",
-        ],
-        "ml": [
-            "tensorflow>=2.13.0",
-            "torch>=2.0.1",
-            "transformers>=4.31.0",
-            "scikit-learn>=1.3.0",
-        ],
-        "backtest": [
-            "backtrader>=1.9.78.123",
-            "vectorbt>=0.26.0",
-            "numba>=0.57.1",
-        ],
-    },
-    entry_points={
-        "console_scripts": [
-            "trading-backtest=trading.backtest.cli:main",
-            "trading-fetch=trading.data.cli:main",
-        ],
-    },
+    install_requires=[
+        "numpy>=1.24.3",
+        "pandas>=2.0.3",
+        "pandas-ta>=0.3.14b0",
+        "yfinance==0.2.28",
+        "requests>=2.31.0",
+        "websocket-client>=1.6.1",
+        "scikit-learn>=1.3.0",
+        "tensorflow>=2.13.0",
+        "torch>=2.0.1",
+        "transformers>=4.31.0",
+        "backtrader>=1.9.78.123",
+        "vectorbt>=0.26.0",
+        "numba>=0.57.1",
+        "matplotlib>=3.7.2",
+        "seaborn>=0.12.2",
+        "plotly>=5.15.0",
+        "sqlalchemy>=2.0.20",
+        "pymongo>=4.5.0",
+        "python-dotenv>=1.0.0",
+        "loguru>=0.7.0",
+        "tqdm>=4.65.0",
+        "pytest>=7.4.0",
+        "pytest-cov>=4.1.0",
+        "mypy>=1.5.1",
+        "black>=23.7.0",
+        "flake8>=6.1.0",
+        "pyyaml>=6.0.1",
+        "pydantic>=2.0.0",
+    ],
+    python_requires=">=3.8",
+    author="Your Name",
+    author_email="your.email@example.com",
+    description="A trading system with machine learning capabilities",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
+    url="https://github.com/yourusername/trading",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Financial and Insurance Industry",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+    ],
 ) 
