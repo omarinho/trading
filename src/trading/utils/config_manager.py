@@ -5,6 +5,7 @@ import yaml
 from pydantic import BaseModel, Field, field_validator
 from dotenv import load_dotenv
 from loguru import logger
+import json
 
 # Load environment variables
 load_dotenv()
@@ -85,132 +86,69 @@ class MLConfig(BaseModel):
         return v
 
 class ConfigManager:
-    """Configuration management for the trading system.
+    """Configuration manager for the trading system.
     
-    This class:
-    - Loads and validates YAML configuration
-    - Manages environment variables
-    - Provides type-safe access to config values
-    - Handles default values and validation
-    - Ensures all paths exist
+    This class handles loading and accessing configuration data
+    from JSON files.
     """
     
-    def __init__(self, config_path: Optional[str] = None):
-        self.root_dir = Path(__file__).parent.parent.parent.parent
-        self.config_path = config_path or str(self.root_dir / "config" / "config.yaml")
-        self._config: Dict[str, Any] = {}
-        self._load_config()
+    def __init__(self, config_file: str = "config.json"):
+        """Initialize the configuration manager.
         
-    def _load_config(self) -> None:
-        """Load and validate configuration from YAML file."""
-        try:
-            with open(self.config_path, 'r') as f:
-                raw_config = yaml.safe_load(f)
-                
-            # Validate and convert to Pydantic models
-            self._config = {
-                "api": APIConfig(**raw_config.get("api", {})),
-                "database": DatabaseConfig(**raw_config.get("database", {})),
-                "strategy": StrategyConfig(**raw_config.get("strategy", {})),
-                "ml": MLConfig(**raw_config.get("ml", {})),
-                "data": raw_config.get("data", {}),
-                "backtest": raw_config.get("backtest", {}),
-                "logging": raw_config.get("logging", {}),
-                "visualization": raw_config.get("visualization", {})
-            }
+        Args:
+            config_file: Path to the configuration file
+        """
+        self.config_file = config_file
+        self.config = self._load_config()
+    
+    def _load_config(self) -> Dict[str, Any]:
+        """Load configuration from file.
+        
+        Returns:
+            Dictionary containing configuration data
             
-        except FileNotFoundError:
-            logger.warning(f"Config file not found at {self.config_path}, using defaults")
-            self._config = self._get_default_config()
+        Raises:
+            FileNotFoundError: If config file doesn't exist
+            json.JSONDecodeError: If config file is invalid
+        """
+        try:
+            if not os.path.exists(self.config_file):
+                raise FileNotFoundError(f"Configuration file not found: {self.config_file}")
+            
+            with open(self.config_file, 'r') as f:
+                config = json.load(f)
+            
+            return config
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"Error parsing configuration file: {e}")
+            raise
         except Exception as e:
-            logger.error(f"Error loading config: {e}")
+            logger.error(f"Error loading configuration: {e}")
             raise
     
-    def _get_default_config(self) -> Dict[str, Any]:
-        """Return validated default configuration."""
-        return {
-            "api": APIConfig(),
-            "database": DatabaseConfig(),
-            "strategy": StrategyConfig(),
-            "ml": MLConfig(),
-            "data": {
-                "raw_data_dir": str(self.root_dir / "data" / "raw"),
-                "processed_data_dir": str(self.root_dir / "data" / "processed"),
-                "cache_dir": str(self.root_dir / "data" / "cache"),
-            },
-            "backtest": {
-                "initial_capital": 100000.0,
-                "commission": 0.001,
-                "slippage": 0.0005,
-            },
-            "logging": {
-                "level": "INFO",
-                "file": str(self.root_dir / "logs" / "trading.log"),
-            },
-            "visualization": {
-                "style": "seaborn",
-                "context": "paper",
-                "palette": "deep",
-                "dpi": 300,
-                "save_dir": str(self.root_dir / "plots"),
-            }
-        }
-    
-    def get(self, key: str, default: Any = None) -> Any:
-        """Get configuration value using dot notation (e.g., 'data.raw_data_dir')."""
-        keys = key.split('.')
-        value = self._config
-        for k in keys:
-            if isinstance(value, dict):
-                value = value.get(k, default)
-            elif hasattr(value, k):
-                value = getattr(value, k)
-            else:
-                return default
-        return value
-    
-    def get_env(self, key: str, default: Any = None) -> str:
-        """Get environment variable with validation."""
-        value = os.getenv(key, default)
-        if value is None:
-            logger.warning(f"Environment variable {key} not found")
-        return value
-    
-    def get_path(self, key: str) -> Path:
-        """Get path from config and ensure directory exists."""
-        path = Path(self.get(key))
-        if not path.is_absolute():
-            path = self.root_dir / path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        return path
-    
-    def get_api_config(self) -> APIConfig:
-        """Get validated API configuration."""
-        return self._config["api"]
-    
-    def get_database_config(self) -> DatabaseConfig:
-        """Get validated database configuration."""
-        return self._config["database"]
-    
-    def get_strategy_config(self) -> StrategyConfig:
-        """Get validated strategy configuration."""
-        return self._config["strategy"]
-    
-    def get_ml_config(self) -> MLConfig:
-        """Get validated machine learning configuration."""
-        return self._config["ml"]
-    
-    def validate(self) -> bool:
-        """Validate entire configuration."""
+    def get_data_collector_config(self) -> Dict[str, Any]:
+        """Get data collector configuration.
+        
+        Returns:
+            Dictionary containing data collector configuration
+            
+        Raises:
+            KeyError: If data collector config is missing
+        """
         try:
-            # Validate all Pydantic models
-            for key, value in self._config.items():
-                if isinstance(value, BaseModel):
-                    value.model_validate(value.model_dump())
-            return True
-        except Exception as e:
-            logger.error(f"Configuration validation failed: {e}")
-            return False
+            return self.config['data_collector']
+        except KeyError:
+            logger.error("Data collector configuration not found")
+            raise KeyError("Data collector configuration not found in config file")
+    
+    def get_config(self) -> Dict[str, Any]:
+        """Get the entire configuration.
+        
+        Returns:
+            Dictionary containing all configuration data
+        """
+        return self.config
 
 # Create global config instance
 config = ConfigManager()

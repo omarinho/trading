@@ -2,9 +2,9 @@
 
 # Data Management
 data:
-  raw_data_dir: data/raw
-  processed_data_dir: data/processed
-  cache_dir: data/cache
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  cache_dir: "data/cache"
   symbols:
     - AAPL
     - MSFT
@@ -61,11 +61,18 @@ api:
     timeout: 10
     retries: 3
     rate_limit: 5000  # requests per minute
+  alpha_vantage:
+    api_key: "7DOWNLDO51BSEYHD"  # Set your API key here or use ALPHA_VANTAGE_API_KEY environment variable
+    base_url: "https://www.alphavantage.co/query"
+    rate_limit:
+      calls_per_minute: 5
+      calls_per_day: 500
 
 # Logging
 logging:
-  level: INFO
-  file: logs/trading.log
+  level: "INFO"
+  format: "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {message}"
+  file: "logs/trading.log"
   max_size: 500MB
   backup_count: 10
 
